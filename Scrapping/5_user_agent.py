@@ -8,5 +8,5 @@ headers = {
 url = 'http://nadocoding.tistory.com'
 
 res = requests.get(url=url, headers=headers)
-with open('nadocoding.html', 'w', encoding='utf-8') as f:
+with open('../nadocoding.html', 'w', encoding='utf-8') as f:
     f.write(res.text)
