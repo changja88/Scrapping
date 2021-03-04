@@ -32,8 +32,8 @@ class NoOptionItemStockChecker:
         browser.get(url=self.get_item_url(item[1]))
         item_stock_status = item[2]
 
-        print(self.check_sold_out(browser))
-        print(self.check_temporary_sould_out(browser, item))
+        # print(self.check_sold_out(browser))
+        # print(self.check_temporary_sould_out(browser, item))
 
         if self.check_sold_out(browser) or self.check_temporary_sould_out(browser, item):
             # 갤러리아몰 품절
@@ -41,7 +41,7 @@ class NoOptionItemStockChecker:
             if item_stock_status == '판매중':
                 item.append('있음 -> 품절')
                 self.stock_writer.writerow(item)
-                print(f'{item}')
+                # print(f'{item}')
 
             return False
         else:
@@ -50,7 +50,7 @@ class NoOptionItemStockChecker:
             if item_stock_status == '품절':
                 item.append('품절 -> 있음')
                 self.stock_writer.writerow(item)
-                print(f'{item}')
+                # print(f'{item}')
 
             return True
 
@@ -86,20 +86,18 @@ class NoOptionItemStockChecker:
                 if brand in input_item_name:
                     input_item_name = input_item_name.replace(brand, '')
 
-                if input_item_price != price:
-                    self.price_writer.writerow([input_item_name, input_item[0], f'{input_item_price}->{price}'])
-
-                print(input_item_name)
-                print(name)
-
                 # 상품이 여러개 있을수 있기때문에 이름과 가격이 같은 상품만 대상으로 한다
                 if (input_item_name in name or name in input_item_name):
-                    print('묘')
+                    # print('묘')
                     try:
                         item.find_element_by_class_name('soldOut')
                     except:
                         is_sold_out = False
                     else:
+                        if input_item_price != price:
+                            input_item.append(f'{input_item_price} -> {price}')
+                            self.price_writer.writerow(input_item)
+
                         is_sold_out = True
                         return is_sold_out
 

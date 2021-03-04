@@ -65,14 +65,12 @@ def check_items_without_option(soup, writer, item):
         if item_stock_status == '판매중':
             item.append('있음->품절')
             writer.writerow(item)
-            print(f'{item}')
     else:
         # 갤러리아몰 재고 있음
         # print('판매')
         if item_stock_status == '품절':
             item.append('품절->있음')
             writer.writerow(item)
-            print(f'{item}')
 
 
 def check_sold_out(soup: BeautifulSoup):

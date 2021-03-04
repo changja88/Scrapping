@@ -1,10 +1,11 @@
 import csv
 from datetime import date
+import time
 
 import ItemCollecter
 import OptionFinder
 from selenium import webdriver
-import NoOptionItemStockChecker
+import StockFinder
 
 
 def make_chrome_browser():
@@ -52,37 +53,39 @@ def run():
     :return:
     '''
 
+    start_time = time.time()
     browser = make_chrome_browser()
-
     item_collecter = ItemCollecter.ItemCollecter()
+    item_list_with_option, item_list_without_option = item_collecter.get_item_lists()
 
-    no_option_item_stocker_checker = NoOptionItemStockChecker.NoOptionItemStockChecker(
-        stock_writer=make_csv_writer_for_option_item(),
+    no_option_item_stocker_checker = StockFinder.NoOptionItemStockChecker(
+        stock_writer=make_csv_writer_for_no_option_item(),
         price_writer=make_csv_writer_for_item_price()
     )
     option_finder = OptionFinder.OptionFinder(
         browser=browser,
-        writer=make_csv_writer_for_no_option_item()
+        writer=make_csv_writer_for_option_item()
     )
 
-    item_list_with_option, item_list_without_option = item_collecter.get_item_lists()
+    # item_list_without_option = [
+    #     ['5116963713', '랑콤 어드밴스드 제니피끄 아이 크림 15ml', '판매중', '1'],
+    #     ['5089479641', '디올 루즈 디올 울트라 루즈', '판매중', '1']
+    # ]
+    #
+    # item_list_with_option = [
+    #     ['5232394679','산타마리아노벨라 아쿠아 디 콜로니아 - 시타 디 교토','판매중','218000'],
+    # ]
 
-    # [상품번호, 상품명, 판매상테, 백화점정가]
-    item_list_with_option = [
-        # TODO : 이거 재고 있음으로 나오게 해야함
-        ['5116963713', '랑콤 어드밴스드 제니피끄 아이 크림 15ml', '판매중', '99000'],
-        # ['5089479641', '디올 루즈 디올 울트라 루즈', '판매중', '48000']
-    ]
 
     count = 0
-    # for item in item_list_without_option:
-    #     no_option_item_stocker_checker.check_item_stock(
-    #         browser=browser,
-    #         item=item,
-    #     )
-    #     count += 1
-    #     if count % 10 == 0:
-    #         print(count)
+    for item in item_list_without_option:
+        no_option_item_stocker_checker.check_item_stock(
+            browser=browser,
+            item=item,
+        )
+        count += 1
+        if count % 10 == 0:
+            print(count)
 
     count = 0
     for item in item_list_with_option:
@@ -97,13 +100,23 @@ def run():
                 input_item=item
             )
             if goods_no:
-                option_finder.compare_option(
+                result = option_finder.compare_option(
                     item=item,
                     goods_no=goods_no
                 )
+                print(result)
+
         count += 1
         if count % 10 == 0:
             print(count)
+
+    time.sleep(10)
+    browser.close()
+    browser.quit()
+
+    end_time = time.time()
+    processing_time = end_time - start_time
+    print(f'처리시간 {processing_time}')
 
 
 run()

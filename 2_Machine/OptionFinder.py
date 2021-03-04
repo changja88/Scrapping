@@ -4,25 +4,29 @@ class SmartStoreItemOptionFinder:
         return f'https://smartstore.naver.com/in_bloomington/products/{item_number}'
 
     def get_item_option_list(self, browser, item_id):
-        invalid_option_list = ['제품 브랜드 쇼핑백 (+1,000원)']
+        invalid_option_list = ['제품 브랜드 쇼핑백 (+1,000원)', '선물포장재(+1,000원)']
 
         result_option_list = {}
         valid_options = []
         soldout_options = []
 
         browser.get(self.make_url(item_id))
-        option_btn = browser.find_element_by_class_name('_3R5zw_nN-K')
+        option_btn = browser.find_element_by_class_name('_3NaJVRY_EO')
         option_btn.click()
 
-        option_list = browser.find_element_by_class_name('_1VTfy4KOtG').find_elements_by_tag_name('li')
-        for option in option_list:
-            option = option.text.replace(' ', '')
-            if option not in invalid_option_list:
-                if '(품절)' in option:
-                    result = option.replace('(품절)', '')
-                    soldout_options.append(result)
-                else:
-                    valid_options.append(option)
+        # 선물 포장 옵션만 있는 경우에는 넘어가기 위해서 try처리
+        try:
+            option_list = browser.find_element_by_class_name('_1VTfy4KOtG').find_elements_by_tag_name('li')
+            for option in option_list:
+                option = option.text.replace(' ', '')
+                if option not in invalid_option_list:
+                    if '(품절)' in option:
+                        result = option.replace('(품절)', '')
+                        soldout_options.append(result)
+                    else:
+                        valid_options.append(option)
+        except:
+            pass
 
         result_option_list['valid'] = valid_options
         result_option_list['soldout'] = soldout_options
@@ -37,6 +41,7 @@ class MallItemOptionFinder:
 
 
     def get_item_option_list(self, browser, goods_no):
+        invalid_option_list = ['옵션검색하기']
 
         valid_options = []
         soldout_options = []
@@ -44,23 +49,30 @@ class MallItemOptionFinder:
 
         browser.get(self.make_url(goods_no))
 
-        option_btn = browser.find_element_by_id('opt_btn_top_1')
-        option_btn.click()
+        try:
+            # 묶음 상품의 경우 갤러리아몰에 옵션으로 존재 하지 않아서 try로 처리
+            option_btn = browser.find_element_by_id('opt_btn_top_1')
+            option_btn.click()
 
-        option_list = browser.find_element_by_name('option_list').find_elements_by_tag_name('li')
+            option_list = browser.find_element_by_name('option_list').find_elements_by_tag_name('li')
 
-        for option in option_list:
-            option = option.text.replace(' ', '')
-            if '(품절)' in option:
-                result = option.replace('(품절)', '')
-                soldout_options.append(result)
-            else:
-                valid_options.append(option)
+            for option in option_list:
+                option = option.text.replace(' ', '')
+                if option not in invalid_option_list:
+                    if '(품절)' in option:
+                        result = option.replace('(품절)', '')
+                        soldout_options.append(result)
+                    else:
+                        valid_options.append(option)
 
-        result_option_list['valid'] = valid_options
-        result_option_list['soldout'] = soldout_options
+            result_option_list['valid'] = valid_options
+            result_option_list['soldout'] = soldout_options
+            return result_option_list
 
-        return result_option_list
+        except:
+            result_option_list['valid'] = valid_options
+            result_option_list['soldout'] = soldout_options
+            return result_option_list
 
 
 class OptionFinder:
@@ -83,19 +95,14 @@ class OptionFinder:
 
         need_to_be_sold_out = []
         for valid in store_options['valid']:
-
             # 품절 시켜야할 옵션
             if valid not in mall_options['valid']:
                 need_to_be_sold_out.append(valid)
 
         need_to_be_add = []
-        for soldout in store_options['soldout']:
-
-            if soldout in mall_options['valid']:
-                need_to_be_add.append(soldout)
-
-        print(need_to_be_sold_out)
-        print(need_to_be_add)
+        for valid in mall_options['valid']:
+            if valid not in store_options['valid']:
+                need_to_be_add.append(valid)
 
         if len(need_to_be_sold_out) > 1 or len(need_to_be_add):
             self.writer.writerow([item[0], item[1]])
