@@ -69,7 +69,7 @@ def run():
 
     # item_list_without_option = [
     #     ['5116963713', '랑콤 어드밴스드 제니피끄 아이 크림 15ml', '판매중', '1'],
-    #     ['5089479641', '디올 루즈 디올 울트라 루즈', '판매중', '1']
+    #     ['5089479641', '메이크업포에버 228 프리시젼 아이 섀이더 브러쉬 미디엄', '판매중', '1']
     # ]
     #
     # item_list_with_option = [
@@ -110,7 +110,6 @@ def run():
         if count % 10 == 0:
             print(count)
 
-    time.sleep(10)
     browser.close()
     browser.quit()
 

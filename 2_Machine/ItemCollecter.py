@@ -29,7 +29,7 @@ class ItemCollecter:
         item_list_with_option = []
         item_list_without_option = []
 
-        with open('../1_Row/2021_03_03.csv', newline='') as csvfile:
+        with open('../1_Row/2021_03_07.csv', newline='') as csvfile:
         # with open('../1_Row/test.csv', newline='') as csvfile:
             reader = csv.reader(csvfile)
             header = next(reader)

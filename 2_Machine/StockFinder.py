@@ -64,6 +64,12 @@ class NoOptionItemStockChecker:
         else:
             return True  # 완전 품절
 
+    def modify_mall_item_name(self, item_name: str):
+        if item_name.startswith('['):
+            end_index = item_name.index(']') + 1
+            return item_name[end_index:1]
+        else:
+            return item_name
 
     def check_temporary_sould_out(self, browser, input_item):
         input_item_name = self.clean_text(input_item[1])
@@ -74,21 +80,27 @@ class NoOptionItemStockChecker:
             item_list = browser.find_element_by_id('crossList').find_element_by_class_name(
                 'goods_list').find_element_by_tag_name('ul').find_elements_by_tag_name('li')
 
+            modified_mall_item_list = []
+
             for item in item_list:
                 item = item.find_element_by_tag_name('dl')
                 price = int(item.find_element_by_class_name('prm').text.replace(',', ''))
                 brand = browser.find_element_by_class_name('brd').text.replace(' ', '')
                 name = self.clean_text(item.find_element_by_class_name('tit').text)  # 비교를 위해서 특수 문자 제거
+                name = self.modify_mall_item_name(name)
+                modified_mall_item_list.append(name)
 
                 # 브랜드 명을 제외하고 상품명을 비교한다 (검색은 브래드를 포함하여 했음)
                 if brand in name:
                     name = name.replace(brand, '')
                 if brand in input_item_name:
                     input_item_name = input_item_name.replace(brand, '')
-
                 # 상품이 여러개 있을수 있기때문에 이름과 가격이 같은 상품만 대상으로 한다
-                if (input_item_name in name or name in input_item_name):
-                    # print('묘')
+
+                # print(input_item_name)
+                # print(name)
+
+                if input_item_name == name:
                     try:
                         item.find_element_by_class_name('soldOut')
                     except:

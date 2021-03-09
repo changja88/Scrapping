@@ -105,6 +105,7 @@ class OptionFinder:
                 need_to_be_add.append(valid)
 
         if len(need_to_be_sold_out) > 1 or len(need_to_be_add):
+            self.writer.writerow([])
             self.writer.writerow([item[0], item[1]])
 
             if len(need_to_be_sold_out) > 1:
